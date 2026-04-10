@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
-import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Package } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
+import { ChevronRight } from 'lucide-react'
 import API from '../api/axios'
 
 const statusColors = {
@@ -18,6 +18,7 @@ const statusColors = {
 const Orders = () => {
   const [orders, setOrders] = useState([])
   const [loading, setLoading] = useState(true)
+  const navigate = useNavigate()
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -58,15 +59,22 @@ const Orders = () => {
         ) : (
           <div className="space-y-4">
             {orders.map(order => (
-              <div key={order._id} className="bg-white border border-[#e8c49a]/40 rounded-xl p-5">
+              <div
+                key={order._id}
+                onClick={() => navigate(`/orders/${order._id}`)}
+                className="bg-white border border-[#e8c49a]/40 rounded-xl p-5 cursor-pointer hover:shadow-sm hover:-translate-y-0.5 transition-all"
+              >
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <p className="text-xs text-[#9a6340] mb-1">Order ID</p>
                     <p className="text-sm font-mono text-[#3d271a]">{order._id}</p>
                   </div>
-                  <span className={`text-xs px-3 py-1 rounded-full font-medium capitalize ${statusColors[order.status]}`}>
-                    {order.status}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-3 py-1 rounded-full font-medium capitalize ${statusColors[order.status]}`}>
+                      {order.status}
+                    </span>
+                    <ChevronRight size={16} className="text-[#c49a70]" />
+                  </div>
                 </div>
                 <div className="flex justify-between items-center text-sm">
                   <p className="text-[#5c3a26]">{order.items.length} item{order.items.length !== 1 ? 's' : ''}</p>

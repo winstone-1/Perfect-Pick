@@ -18,6 +18,8 @@ import Orders from './pages/Orders'
 import { WishlistProvider } from './context/WishlistContext'
 import Wishlist from './pages/Wishlist'
 import Profile from './pages/Profile'
+import OrderDetail from './pages/OrderDetail'
+
 function App() {
   return (
     <BrowserRouter>
@@ -41,6 +43,7 @@ function App() {
             <Route path="/admin/orders" element={<ProtectedRoute adminOnly><ManageOrders /></ProtectedRoute>} />
             <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
           </Routes>
         </CartProvider>
           </WishlistProvider>
