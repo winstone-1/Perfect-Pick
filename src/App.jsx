@@ -19,6 +19,8 @@ import { WishlistProvider } from './context/WishlistContext'
 import Wishlist from './pages/Wishlist'
 import Profile from './pages/Profile'
 import OrderDetail from './pages/OrderDetail'
+import NotFound from './pages/NotFound'
+
 
 function App() {
   return (
@@ -44,6 +46,7 @@ function App() {
             <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/orders/:id" element={<ProtectedRoute><OrderDetail /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </CartProvider>
           </WishlistProvider>
