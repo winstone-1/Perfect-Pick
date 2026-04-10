@@ -17,7 +17,7 @@ import ManageOrders from './pages/admin/ManageOrders'
 import Orders from './pages/Orders'
 import { WishlistProvider } from './context/WishlistContext'
 import Wishlist from './pages/Wishlist'
-
+import Profile from './pages/Profile'
 function App() {
   return (
     <BrowserRouter>
@@ -40,6 +40,7 @@ function App() {
             <Route path="/admin/products" element={<ProtectedRoute adminOnly><ManageProducts /></ProtectedRoute>} />
             <Route path="/admin/orders" element={<ProtectedRoute adminOnly><ManageOrders /></ProtectedRoute>} />
             <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           </Routes>
         </CartProvider>
           </WishlistProvider>
