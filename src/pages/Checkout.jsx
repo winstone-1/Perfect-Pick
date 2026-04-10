@@ -19,6 +19,10 @@ const Checkout = () => {
     city: '',
   })
   const [errors, setErrors] = useState({})
+  const [mpesaPhone, setMpesaPhone] = useState('')
+  const [mpesaStep, setMpesaStep] = useState('idle')
+  const [checkoutRequestId, setCheckoutRequestId] = useState(null)
+  const [mpesaError, setMpesaError] = useState('')
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -35,16 +39,47 @@ const Checkout = () => {
     return Object.keys(newErrors).length === 0
   }
 
-  const handleSubmit = async () => {
+  const handleMpesaPayment = async () => {
     if (!validate()) return
+    if (!mpesaPhone.trim()) return setMpesaError('Please enter your M-Pesa phone number')
+
     try {
       setLoading(true)
-      await API.post('/orders', { shippingAddress: form })
+      const orderRes = await API.post('/orders', { shippingAddress: form })
+      const orderId = orderRes.data._id
+
+      const mpesaRes = await API.post('/mpesa/stkpush', {
+        phone: mpesaPhone,
+        amount: cartTotal,
+        orderId,
+      })
+
+      setCheckoutRequestId(mpesaRes.data.checkoutRequestId)
+      setMpesaStep('waiting')
       await clearCart()
-      toast.success('Order placed successfully!')
-      navigate('/orders')
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to place order')
+      toast.error(error.response?.data?.message || 'Failed to initiate payment')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleQueryPayment = async () => {
+    try {
+      setLoading(true)
+      const { data } = await API.post('/mpesa/query', { checkoutRequestId })
+      if (data.resultCode === '0' || data.resultCode === 0) {
+        setMpesaStep('success')
+        setTimeout(() => {
+          toast.success('Order placed successfully!')
+          navigate('/orders')
+        }, 1500)
+      } else {
+        setMpesaStep('failed')
+        toast.error('Payment not confirmed. Please try again.')
+      }
+    } catch (error) {
+      toast.error('Could not verify payment')
     } finally {
       setLoading(false)
     }
@@ -124,13 +159,78 @@ const Checkout = () => {
               <span>Total</span>
               <span>KSh {cartTotal.toLocaleString()}</span>
             </div>
-            <Button
-              onClick={handleSubmit}
-              disabled={loading}
-              className="w-full bg-[#c08050] hover:bg-[#9a6340] text-white"
-            >
-              {loading ? 'Placing Order...' : 'Place Order'}
-            </Button>
+
+            {/* M-Pesa Payment */}
+            {mpesaStep === 'idle' && (
+              <div className="space-y-3">
+                <div>
+                  <label className="text-xs text-[#5c3a26] mb-1 block">M-Pesa Phone Number</label>
+                  <Input
+                    value={mpesaPhone}
+                    onChange={e => {
+                      setMpesaPhone(e.target.value)
+                      setMpesaError('')
+                    }}
+                    placeholder="07XX XXX XXX"
+                    className="border-[#e8c49a]"
+                  />
+                  {mpesaError && <p className="text-red-400 text-xs mt-1">{mpesaError}</p>}
+                </div>
+                <Button
+                  onClick={handleMpesaPayment}
+                  disabled={loading}
+                  className="w-full bg-[#4CAF50] hover:bg-[#388E3C] text-white py-5"
+                >
+                  {loading ? 'Processing...' : '💚 Pay with M-Pesa'}
+                </Button>
+              </div>
+            )}
+
+            {mpesaStep === 'waiting' && (
+              <div className="text-center py-4 space-y-3">
+                <div className="w-12 h-12 border-4 border-[#4CAF50] border-t-transparent rounded-full animate-spin mx-auto" />
+                <p className="text-sm font-medium text-[#3d271a]">Check your phone!</p>
+                <p className="text-xs text-[#9a6340]">Enter your M-Pesa PIN to complete payment</p>
+                <Button
+                  onClick={handleQueryPayment}
+                  disabled={loading}
+                  variant="outline"
+                  size="sm"
+                  className="border-[#4CAF50] text-[#4CAF50] hover:bg-green-50"
+                >
+                  {loading ? 'Checking...' : "I've paid — confirm"}
+                </Button>
+                <button
+                  onClick={() => setMpesaStep('idle')}
+                  className="block text-xs text-[#9a6340] hover:underline mx-auto"
+                >
+                  Cancel
+                </button>
+              </div>
+            )}
+
+            {mpesaStep === 'success' && (
+              <div className="text-center py-4 space-y-2">
+                <div className="text-4xl">✅</div>
+                <p className="font-medium text-green-600">Payment confirmed!</p>
+                <p className="text-xs text-[#9a6340]">Redirecting to your orders...</p>
+              </div>
+            )}
+
+            {mpesaStep === 'failed' && (
+              <div className="text-center py-4 space-y-3">
+                <div className="text-4xl">❌</div>
+                <p className="font-medium text-red-500">Payment failed</p>
+                <p className="text-xs text-[#9a6340]">Please try again</p>
+                <Button
+                  onClick={() => setMpesaStep('idle')}
+                  className="bg-[#c08050] hover:bg-[#9a6340] text-white"
+                  size="sm"
+                >
+                  Try Again
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
