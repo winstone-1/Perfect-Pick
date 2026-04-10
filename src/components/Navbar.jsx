@@ -1,14 +1,16 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { ShoppingBag, Menu, X, User, LogOut } from 'lucide-react'
+import { ShoppingBag, Menu, X, LogOut, Heart, User } from 'lucide-react'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 
 const Navbar = () => {
   const { user, logout } = useAuth()
   const { cartCount } = useCart()
+  const { wishlist } = useWishlist()
   const navigate = useNavigate()
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -27,7 +29,7 @@ const Navbar = () => {
   return (
     <nav className="sticky top-0 z-50 bg-[#fdf8f3] border-b border-[#e8c49a]/40 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-        
+
         {/* Logo */}
         <Link to="/" className="font-serif text-2xl text-[#7a4d32] tracking-wide">
           Perfect Pick
@@ -47,7 +49,7 @@ const Navbar = () => {
         </div>
 
         {/* Desktop Actions */}
-        <div className="hidden md:flex items-center gap-3">
+        <div className="hidden md:flex items-center gap-2">
           {user ? (
             <>
               {(user.isAdmin || user.role === 'manager') && (
@@ -57,6 +59,20 @@ const Navbar = () => {
                   </Button>
                 </Link>
               )}
+
+              {/* Wishlist */}
+              <Link to="/wishlist" className="relative">
+                <Button variant="ghost" size="icon" className="text-[#7a4d32] hover:bg-[#f9eede]">
+                  <Heart size={20} />
+                  {wishlist.length > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-400 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                      {wishlist.length}
+                    </span>
+                  )}
+                </Button>
+              </Link>
+
+              {/* Cart */}
               <Link to="/cart" className="relative">
                 <Button variant="ghost" size="icon" className="text-[#7a4d32] hover:bg-[#f9eede]">
                   <ShoppingBag size={20} />
@@ -67,6 +83,15 @@ const Navbar = () => {
                   )}
                 </Button>
               </Link>
+
+              {/* Profile */}
+              <Link to="/profile">
+                <Button variant="ghost" size="icon" className="text-[#7a4d32] hover:bg-[#f9eede]">
+                  <User size={20} />
+                </Button>
+              </Link>
+
+              {/* Logout */}
               <Button
                 variant="ghost"
                 size="icon"
@@ -122,8 +147,14 @@ const Navbar = () => {
                   Dashboard
                 </Link>
               )}
+              <Link to="/wishlist" onClick={() => setMenuOpen(false)} className="text-sm text-[#5c3a26] flex items-center gap-2">
+                <Heart size={16} /> Wishlist {wishlist.length > 0 && `(${wishlist.length})`}
+              </Link>
               <Link to="/cart" onClick={() => setMenuOpen(false)} className="text-sm text-[#5c3a26] flex items-center gap-2">
                 <ShoppingBag size={16} /> Cart {cartCount > 0 && `(${cartCount})`}
+              </Link>
+              <Link to="/profile" onClick={() => setMenuOpen(false)} className="text-sm text-[#5c3a26] flex items-center gap-2">
+                <User size={16} /> Profile
               </Link>
               <button onClick={handleLogout} className="text-sm text-left text-[#5c3a26] flex items-center gap-2">
                 <LogOut size={16} /> Logout

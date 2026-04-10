@@ -15,11 +15,16 @@ import Dashboard from './pages/admin/Dashboard'
 import ManageProducts from './pages/admin/ManageProducts'
 import ManageOrders from './pages/admin/ManageOrders'
 import Orders from './pages/Orders'
+import { WishlistProvider } from './context/WishlistContext'
+import Wishlist from './pages/Wishlist'
+
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <WishlistProvider>
         <CartProvider>
+
           <Toaster position="top-right" richColors />
           <Routes>
             <Route path="/" element={<Home />} />
@@ -34,8 +39,10 @@ function App() {
             <Route path="/admin" element={<ProtectedRoute adminOnly><Dashboard /></ProtectedRoute>} />
             <Route path="/admin/products" element={<ProtectedRoute adminOnly><ManageProducts /></ProtectedRoute>} />
             <Route path="/admin/orders" element={<ProtectedRoute adminOnly><ManageOrders /></ProtectedRoute>} />
+            <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
           </Routes>
         </CartProvider>
+          </WishlistProvider>
       </AuthProvider>
     </BrowserRouter>
   )
